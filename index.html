@@ -12,35 +12,23 @@
     <style>
         :root { --primary: #0f172a; --accent: #f59e0b; --bg: #f8fafc; }
         body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; display: flex; font-size: 13px; }
-        
-        /* Sidebar */
         .sidebar { width: 260px; background: var(--primary); height: 100vh; position: fixed; color: white; overflow-y: auto; }
         .nav-item { padding: 15px 20px; display: flex; align-items: center; cursor: pointer; transition: 0.3s; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .nav-item:hover { background: rgba(255,255,255,0.1); color: var(--accent); }
-        
-        /* Main */
         .main { margin-left: 260px; flex: 1; padding: 25px; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 20px; border-top: 4px solid var(--accent); }
-        
-        /* Form Grid */
         .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .input-group { display: flex; flex-direction: column; }
         label { font-weight: 600; margin-bottom: 5px; color: #475569; font-size: 11px; text-transform: uppercase; }
         input, select { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
-        
-        /* Buttons */
         .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; color: white; transition: 0.2s; }
         .btn-save { background: var(--accent); color: var(--primary); width: 100%; margin-top: 20px; font-size: 15px; }
-        .btn-delete { background: #ef4444; padding: 5px 10px; font-size: 11px; }
-        .btn-edit { background: #3b82f6; padding: 5px 10px; font-size: 11px; margin-right: 5px; }
-
-        /* Table */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th { background: #f1f5f9; color: #475569; padding: 12px; text-align: left; font-size: 11px; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
         .hidden { display: none; }
         #login-screen { position: fixed; inset: 0; background: var(--primary); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .error-msg { color: #ef4444; font-size: 12px; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -48,9 +36,11 @@
 <div id="login-screen">
     <div class="card" style="width: 320px; text-align: center;">
         <h2 style="color:var(--primary)">🙏 राधा राधा 🙏</h2>
+        <p>Insurance Management ERP</p>
         <input type="email" id="l-email" placeholder="Email" style="margin-bottom:10px; width:100%">
-        <input type="password" id="l-pass" placeholder="Password" style="margin-bottom:20px; width:100%">
+        <input type="password" id="l-pass" placeholder="Password" style="margin-bottom:10px; width:100%">
         <button onclick="login()" class="btn-save" style="margin:0">Login</button>
+        <div id="login-err" class="error-msg"></div>
     </div>
 </div>
 
@@ -61,7 +51,6 @@
     <div class="nav-item" onclick="showP('dash')"><i class="fas fa-chart-pie"></i>&nbsp; DASHBOARD</div>
     <div class="nav-item" onclick="showP('entry')"><i class="fas fa-plus-square"></i>&nbsp; NEW POLICY ENTRY</div>
     <div class="nav-item" onclick="showP('list')"><i class="fas fa-table"></i>&nbsp; POLICY DATABASE</div>
-    <div class="nav-item" onclick="showP('recon')"><i class="fas fa-sync"></i>&nbsp; RECONCILIATION</div>
     <div class="nav-item" style="margin-top:50px; color:#f87171" onclick="firebase.auth().signOut().then(()=>location.reload())">
         <i class="fas fa-power-off"></i>&nbsp; LOGOUT
     </div>
@@ -69,96 +58,47 @@
 
 <div class="main hidden" id="main-ui">
     <div id="p-dash" class="page">
-        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:20px;">
-            <div class="card"><h3>Policies</h3><h2 id="st-cnt">0</h2></div>
-            <div class="card"><h3>Net Premium</h3><h2 id="st-net" style="color:green">₹0</h2></div>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
+            <div class="card"><h3>Total Net Business</h3><h2 id="st-net" style="color:green">₹0</h2></div>
             <div class="card"><h3>Total Received</h3><h2 id="st-rcv" style="color:blue">₹0</h2></div>
             <div class="card"><h3>Total Pending</h3><h2 id="st-bal" style="color:red">₹0</h2></div>
         </div>
-        <div class="card"><h3>RM Wise Performance Tracking</h3><div id="rm-stats"></div></div>
     </div>
 
     <div id="p-entry" class="page hidden">
         <div class="card">
-            <h3 id="form-title">📝 Policy Management Form</h3>
+            <h3>📝 Policy Entry Form</h3>
             <input type="hidden" id="f-id">
             <div class="form-grid">
                 <div class="input-group"><label>Date</label><input type="date" id="f-date"></div>
                 <div class="input-group"><label>RM Name</label><input type="text" id="f-rm"></div>
-                <div class="input-group"><label>Agent Name</label><input type="text" id="f-agent"></div>
-                <div class="input-group"><label>Service Provider (Code)</label><input type="text" id="f-csc"></div>
-                
                 <div class="input-group"><label>Customer Name</label><input type="text" id="f-client"></div>
-                <div class="input-group"><label>Vehicle Reg. No</label><input type="text" id="f-reg"></div>
-                <div class="input-group"><label>Policy Number</label><input type="text" id="f-polno"></div>
-                
-                <div class="input-group"><label>Vehicle Type</label>
-                    <select id="f-vtype">
-                        <option>Two Wheeler</option><option>Private Car</option><option>GCV</option>
-                        <option>Tractor</option><option>Crane</option><option>Combine</option>
-                        <option>Ambulance</option><option>School Bus</option><option>Route Bus</option><option>PCV Taxi</option>
-                    </select>
-                </div>
-
-                <div class="input-group"><label>GVW / CC</label><input type="text" id="f-gvw"></div>
-                <div class="input-group"><label>Insurance Company</label><input type="text" id="f-comp"></div>
-                <div class="input-group"><label>Policy Type</label>
-                    <select id="f-ptype">
-                        <option>Third Party</option><option>Package</option><option>OD Premium</option>
-                    </select>
-                </div>
-
-                <div class="input-group"><label>OD Premium</label><input type="number" id="f-od" oninput="calc()"></div>
-                <div class="input-group"><label>TP Premium</label><input type="number" id="f-tp" oninput="calc()"></div>
-                <div class="input-group"><label>NET Premium (Auto)</label><input type="number" id="f-net" readonly style="background:#f1f5f9"></div>
-                <div class="input-group"><label>Last Payment Received</label><input type="number" id="f-rcvd" oninput="calc()"></div>
-                <div class="input-group"><label>Balance Pending</label><input type="number" id="f-bal" readonly style="color:red; background:#fef2f2"></div>
-
-                <div class="input-group"><label>Payment Mode</label>
-                    <select id="f-pmode" onchange="toggleCard()">
-                        <option>Cash</option><option>Online</option><option>Card</option><option>Cheque</option>
-                    </select>
-                </div>
-                
-                <div id="card-details" class="form-grid" style="grid-column: span 4; display:none; border:1px dashed #ccc; padding:10px; margin-top:10px;">
-                    <div class="input-group"><label>Card Holder Name</label><input type="text" id="f-card-name"></div>
-                    <div class="input-group"><label>Card Last 4 Digits</label><input type="text" id="f-card-last"></div>
-                    <div class="input-group"><label>Payment Date</label><input type="date" id="f-pay-date"></div>
-                </div>
+                <div class="input-group"><label>Vehicle No</label><input type="text" id="f-reg"></div>
+                <div class="input-group"><label>Policy No</label><input type="text" id="f-polno"></div>
+                <div class="input-group"><label>OD Prem</label><input type="number" id="f-od" oninput="calc()"></div>
+                <div class="input-group"><label>TP Prem</label><input type="number" id="f-tp" oninput="calc()"></div>
+                <div class="input-group"><label>Net Prem</label><input type="number" id="f-net" readonly></div>
+                <div class="input-group"><label>Received</label><input type="number" id="f-rcvd" oninput="calc()"></div>
+                <div class="input-group"><label>Balance</label><input type="number" id="f-bal" readonly style="color:red"></div>
             </div>
-            <button onclick="saveData()" class="btn btn-save" id="save-btn">💾 UPDATE CLOUD DATABASE</button>
+            <button onclick="saveData()" class="btn btn-save">💾 Save Policy</button>
         </div>
     </div>
 
     <div id="p-list" class="page hidden">
         <div class="card">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                <input type="text" id="search" placeholder="🔍 Search Customer, Reg No or RM..." onkeyup="search()" style="width:300px">
-                <button onclick="exportExcel()" class="btn" style="background:#22c55e"><i class="fas fa-download"></i> EXCEL DOWNLOAD</button>
-            </div>
-            <table id="main-table">
+            <input type="text" id="search" placeholder="Search Customer..." onkeyup="search()" style="width:100%; margin-bottom:15px;">
+            <table>
                 <thead>
-                    <tr>
-                        <th>Date</th><th>RM</th><th>Customer</th><th>Vehicle</th><th>Company</th><th>Net Prem</th><th>Pending</th><th>Actions</th>
-                    </tr>
+                    <tr><th>Date</th><th>Client</th><th>Vehicle</th><th>Net Prem</th><th>Pending</th><th>RM</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
         </div>
     </div>
-
-    <div id="p-recon" class="page hidden">
-        <div class="card">
-            <h3>🔄 Reconciliation System</h3>
-            <p>Upload Company Excel to match your records</p>
-            <input type="file" id="recon-file" accept=".xlsx, .xls">
-            <button onclick="processRecon()" class="btn" style="background:var(--primary)">Start Recon Match</button>
-        </div>
-    </div>
 </div>
 
 <script>
-    // Config Same as before
     const firebaseConfig = {
         apiKey: "AIzaSyCb4Bd4pGSpJR2SOb6UGEORXb0-O_Ju_M0",
         authDomain: "radhe-radhe-insurance-4d1f8.firebaseapp.com",
@@ -172,8 +112,12 @@
     const db = firebase.firestore();
 
     function login() {
-        firebase.auth().signInWithEmailAndPassword(document.getElementById('l-email').value, document.getElementById('l-pass').value)
-        .catch(e => alert(e.message));
+        const email = document.getElementById('l-email').value;
+        const pass = document.getElementById('l-pass').value;
+        firebase.auth().signInWithEmailAndPassword(email, pass)
+        .catch(e => {
+            document.getElementById('login-err').innerText = "Login Failed: " + e.message;
+        });
     }
 
     firebase.auth().onAuthStateChanged(user => {
@@ -189,126 +133,62 @@
         let od = Number(document.getElementById('f-od').value) || 0;
         let tp = Number(document.getElementById('f-tp').value) || 0;
         let rcv = Number(document.getElementById('f-rcvd').value) || 0;
-        let net = od + tp;
-        document.getElementById('f-net').value = net;
-        document.getElementById('f-bal').value = net - rcv;
-    }
-
-    function toggleCard() {
-        document.getElementById('card-details').style.display = (document.getElementById('f-pmode').value === 'Card') ? 'grid' : 'none';
+        document.getElementById('f-net').value = od + tp;
+        document.getElementById('f-bal').value = (od + tp) - rcv;
     }
 
     function saveData() {
         const id = document.getElementById('f-id').value;
         const data = {
             date: document.getElementById('f-date').value,
-            rm: document.getElementById('f-rm').value,
-            agent: document.getElementById('f-agent').value,
-            csc: document.getElementById('f-csc').value,
+            rm: document.getElementById('f-rm').value || "N/A",
             client: document.getElementById('f-client').value,
             reg: document.getElementById('f-reg').value,
             polno: document.getElementById('f-polno').value,
-            vtype: document.getElementById('f-vtype').value,
-            gvw: document.getElementById('f-gvw').value,
-            comp: document.getElementById('f-comp').value,
-            ptype: document.getElementById('f-ptype').value,
-            od: Number(document.getElementById('f-od').value),
-            tp: Number(document.getElementById('f-tp').value),
             net: Number(document.getElementById('f-net').value),
             rcvd: Number(document.getElementById('f-rcvd').value),
             bal: Number(document.getElementById('f-bal').value),
-            pmode: document.getElementById('f-pmode').value,
-            cardName: document.getElementById('f-card-name').value,
-            cardLast: document.getElementById('f-card-last').value,
-            payDate: document.getElementById('f-pay-date').value,
             ts: firebase.firestore.FieldValue.serverTimestamp()
         };
-
         const col = db.collection("erp_records");
         (id ? col.doc(id).update(data) : col.add(data)).then(() => {
-            alert("🙏 Radhe Radhe! Record Updated.");
-            reset(); showP('list');
+            alert("Success!"); reset(); showP('list');
         });
     }
 
     let allData = [];
-    function loadData() {
-        db.collection("erp_records").orderBy("date", "desc").onSnapshot(snap => {
-            let h = ""; let tNet = 0; let tRcv = 0; let tBal = 0; let rmM = {}; allData = [];
-            snap.forEach(doc => {
-                const d = doc.data(); d.id = doc.id; allData.push(d);
-                tNet += d.net; tRcv += d.rcvd; tBal += d.bal;
-                rmM[d.rm] = (rmM[d.rm] || 0) + d.net;
-
-                h += `<tr>
-                    <td>${d.date}</td><td>${d.rm}</td><td><b>${d.client}</b></td><td>${d.reg}</td><td>${d.comp}</td>
-                    <td>₹${d.net}</td><td style="color:red">₹${d.bal}</td>
-                    <td>
-                        <button class="btn btn-edit" onclick="edit('${d.id}')">EDIT</button>
-                        <button class="btn btn-delete" onclick="del('${d.id}')">DEL</button>
-                    </td>
-                </tr>`;
-            });
-            document.getElementById('table-body').innerHTML = h;
-            document.getElementById('st-cnt').innerText = snap.size;
-            document.getElementById('st-net').innerText = "₹" + tNet.toLocaleString();
-            document.getElementById('st-rcv').innerText = "₹" + tRcv.toLocaleString();
-            document.getElementById('st-bal').innerText = "₹" + tBal.toLocaleString();
-            
-            let rmH = "";
-            for(let r in rmM) { rmH += `<span class='card' style='display:inline-block; margin-right:10px;'><b>${r}:</b> ₹${rmM[r]}</span>`; }
-            document.getElementById('rm-stats').innerHTML = rmH;
-        });
+    async function loadData() {
+        // Fetching from both old and new collections to merge data
+        const oldSnap = await db.collection("mis_records").get();
+        const newSnap = await db.collection("erp_records").orderBy("date", "desc").get();
+        
+        let combined = [];
+        oldSnap.forEach(doc => { combined.push({...doc.data(), id: doc.id}); });
+        newSnap.forEach(doc => { combined.push({...doc.data(), id: doc.id}); });
+        
+        allData = combined;
+        renderTable(allData);
     }
 
-    function edit(id) {
-        let d = allData.find(x => x.id === id);
-        document.getElementById('f-id').value = id;
-        document.getElementById('f-date').value = d.date;
-        document.getElementById('f-rm').value = d.rm;
-        document.getElementById('f-agent').value = d.agent;
-        document.getElementById('f-csc').value = d.csc;
-        document.getElementById('f-client').value = d.client;
-        document.getElementById('f-reg').value = d.reg;
-        document.getElementById('f-polno').value = d.polno;
-        document.getElementById('f-od').value = d.od;
-        document.getElementById('f-tp').value = d.tp;
-        document.getElementById('f-net').value = d.net;
-        document.getElementById('f-rcvd').value = d.rcvd;
-        document.getElementById('f-bal').value = d.bal;
-        document.getElementById('f-vtype').value = d.vtype;
-        document.getElementById('f-comp').value = d.comp;
-        document.getElementById('f-ptype').value = d.ptype;
-        document.getElementById('f-pmode').value = d.pmode;
-        toggleCard();
-        showP('entry');
-    }
-
-    function del(id) { if(confirm("Kya aap delete karna chahte hain?")) db.collection("erp_records").doc(id).delete(); }
-
-    function search() {
-        let v = document.getElementById('search').value.toLowerCase();
-        let f = allData.filter(d => d.client.toLowerCase().includes(v) || d.reg.toLowerCase().includes(v) || d.rm.toLowerCase().includes(v));
-        let h = "";
-        f.forEach(d => {
-            h += `<tr><td>${d.date}</td><td>${d.rm}</td><td><b>${d.client}</b></td><td>${d.reg}</td><td>${d.comp}</td><td>₹${d.net}</td><td style="color:red">₹${d.bal}</td><td><button class="btn btn-edit" onclick="edit('${d.id}')">EDIT</button><button class="btn btn-delete" onclick="del('${d.id}')">DEL</button></td></tr>`;
+    function renderTable(data) {
+        let h = ""; let tNet = 0; let tRcv = 0; let tBal = 0;
+        data.forEach(d => {
+            tNet += (d.net || d.premium || 0);
+            tRcv += (d.rcvd || 0);
+            tBal += (d.bal || 0);
+            h += `<tr><td>${d.date}</td><td><b>${d.client}</b></td><td>${d.reg}</td><td>₹${d.net || d.premium}</td><td style="color:red">₹${d.bal}</td><td>${d.rm}</td><td><button onclick="edit('${d.id}')">Edit</button></td></tr>`;
         });
         document.getElementById('table-body').innerHTML = h;
+        document.getElementById('st-net').innerText = "₹" + tNet.toLocaleString();
+        document.getElementById('st-rcv').innerText = "₹" + tRcv.toLocaleString();
+        document.getElementById('st-bal').innerText = "₹" + tBal.toLocaleString();
     }
 
     function showP(p) { document.querySelectorAll('.page').forEach(e => e.classList.add('hidden')); document.getElementById('p-'+p).classList.remove('hidden'); }
-    function reset() { document.getElementById('f-id').value = ""; document.querySelectorAll('input').forEach(i => i.value = ""); }
-
-    function exportExcel() {
-        const ws = XLSX.utils.json_to_sheet(allData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Policies");
-        XLSX.writeFile(wb, "RadhaRadha_ERP_Report.xlsx");
-    }
-
-    // Basic Recon Logic
-    function processRecon() {
-        alert("Recon functionality is active. It will compare uploaded excel with cloud data based on Policy Number.");
+    function reset() { document.querySelectorAll('input').forEach(i => i.value = ""); }
+    function search() {
+        let v = document.getElementById('search').value.toLowerCase();
+        renderTable(allData.filter(d => d.client.toLowerCase().includes(v) || d.reg.toLowerCase().includes(v)));
     }
 </script>
 </body>
