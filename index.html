@@ -3,68 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🙏 राधा राधा Insurance CRM</title>
+    <title>🙏 🪈 राधा राधा Insurance 🦚 🙏</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #d32f2f; --bg: #f4f7f6; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; }
+        :root { --main: #1a237e; --gold: #ffd700; --orange: #ff6d00; --bg: #f4f7fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; }
+        .sidebar { width: 260px; background: white; height: 100vh; position: fixed; border-right: 3px solid var(--main); z-index: 10; }
+        .main { margin-left: 260px; flex: 1; padding: 25px; min-height: 100vh; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 5px solid var(--main); }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 14px; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; }
+        .btn-save { background: linear-gradient(to right, #1a237e, #3949ab); width: 100%; margin-top: 15px; font-size: 16px; }
+        .btn-excel { background: #2e7d32; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+        th { background: var(--main); color: white; padding: 12px; text-align: left; font-size: 13px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
+        #login-screen { position: fixed; inset: 0; background: var(--main); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .nav-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #f1f1f1; display: flex; align-items: center; color: #333; font-weight: 500; }
+        .nav-item:hover { background: #e8eaf6; color: var(--main); }
+        .nav-item i { margin-right: 15px; color: var(--orange); }
         .hidden { display: none !important; }
-        
-        /* Login Styles */
-        #login-container { height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        
-        /* Dashboard Styles */
-        #dashboard { padding: 20px; }
-        nav { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; border-radius: 8px; margin-bottom: 20px; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .stat-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; }
-        table { width: 100%; background: white; margin-top: 20px; border-collapse: collapse; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
-        th { background: #f8f9fa; }
+        .header-box { text-align: center; padding: 20px; border-bottom: 3px solid var(--gold); background: #fff; }
     </style>
 </head>
 <body>
 
-<div id="login-container">
-    <div class="card">
-        <h2 style="color: var(--primary)">🪈 राधा राधा Insurance</h2>
-        <p>Email: admin@radheradhe.com<br>Pass: admin@123</p>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="pass" placeholder="Password">
-        <button onclick="login()">Login Karein →</button>
-        <p id="msg" style="color: red; font-size: 13px; margin-top: 10px;"></p>
+<div id="login-screen">
+    <div class="card" style="width: 350px; text-align: center; border-top: 6px solid var(--gold);">
+        <h1 style="color: var(--main); margin:0;">🙏 🪈 राधा राधा 🦚 🙏</h1>
+        <p style="margin-bottom:20px; color:#666;">Insurance MIS Portal</p>
+        <input type="email" id="l-email" placeholder="Email" style="margin-bottom:10px;">
+        <input type="password" id="l-pass" placeholder="Password" style="margin-bottom:20px;">
+        <button onclick="login()" class="btn" style="background: var(--orange); width:100%">Login Karein</button>
+        <p id="l-msg" style="color:red; font-size:12px; margin-top:10px;"></p>
     </div>
 </div>
 
-<div id="dashboard" class="hidden">
-    <nav>
-        <span>🙏 Radhe Radhe Insurance CRM</span>
-        <button onclick="logout()" style="width: auto; padding: 5px 15px; background: white; color: var(--primary);">Logout</button>
-    </nav>
+<div class="sidebar hidden" id="sidebar">
+    <div class="header-box">
+        <h2 style="margin:0; color:var(--main);">🙏 राधा राधा 🙏</h2>
+        <div style="font-size: 20px;">🪈 🦚</div>
+    </div>
+    <div class="nav-item" onclick="showP('dash')"><i class="fas fa-chart-line"></i> Dashboard</div>
+    <div class="nav-item" onclick="showP('entry')"><i class="fas fa-plus-circle"></i> New Entry / Edit</div>
+    <div class="nav-item" onclick="showP('list')"><i class="fas fa-database"></i> Policy Database</div>
+    <div class="nav-item" onclick="firebase.auth().signOut().then(()=>location.reload())" style="color:red; margin-top:30px;"><i class="fas fa-power-off"></i> Logout</div>
+</div>
+
+<div class="main hidden" id="main-ui">
     
-    <div class="stats">
-        <div class="stat-box"><h3>📄 0</h3><p>Total Policies</p></div>
-        <div class="stat-box"><h3>💰 ₹0</h3><p>Net Premium</p></div>
-        <div class="stat-box"><h3>👤 0</h3><p>Agents</p></div>
+    <div id="p-dash" class="page">
+        <div class="grid-3">
+            <div class="card"><h4>Total Policies</h4><h2 id="st-count">0</h2></div>
+            <div class="card"><h4>Total Premium</h4><h2 id="st-prem" style="color:green">₹0</h2></div>
+            <div class="card"><h4>Total Pending</h4><h2 id="st-pend" style="color:red">₹0</h2></div>
+        </div>
+        <div class="card">
+            <h3>RM Wise Summary</h3>
+            <div id="rm-stats" class="grid-3"></div>
+        </div>
     </div>
 
-    <table>
-        <thead>
-            <tr><th>Client Name</th><th>Policy No</th><th>Company</th><th>Status</th></tr>
-        </thead>
-        <tbody id="policyTable">
-            <tr><td colspan="4" style="text-align:center">Abhi tak koi data nahi hai.</td></tr>
-        </tbody>
-    </table>
+    <div id="p-entry" class="page hidden">
+        <div class="card">
+            <h3 id="form-title">📝 Policy Entry Form</h3>
+            <input type="hidden" id="f-id">
+            <div class="grid-3">
+                <input type="date" id="f-date">
+                <input type="text" id="f-rm" placeholder="RM Name">
+                <input type="text" id="f-agent" placeholder="Agent Name">
+                <input type="text" id="f-csc" placeholder="Service Provider Code">
+                <input type="text" id="f-client" placeholder="Customer Name">
+                <input type="text" id="f-reg" placeholder="Vehicle No.">
+                <input type="text" id="f-polno" placeholder="Policy No.">
+                
+                <select id="f-vtype">
+                    <option value="">-- Vehicle Type --</option>
+                    <option>Two Wheeler</option><option>Private Car</option><option>GCV</option>
+                    <option>Tractor</option><option>PCV/Bus</option><option>Taxi</option><option>Ambulance</option>
+                </select>
+
+                <input type="text" id="f-gvw" placeholder="GVW / CC">
+                <input type="text" id="f-comp" placeholder="Insurance Company">
+
+                <select id="f-ptype">
+                    <option value="">-- Policy Type --</option>
+                    <option>Third Party</option><option>Package</option><option>OD Only</option>
+                </select>
+
+                <input type="number" id="f-premium" placeholder="Premium Amount" oninput="calcBal()">
+                <input type="number" id="f-rcvd" placeholder="Amount Received" oninput="calcBal()">
+                <input type="number" id="f-bal" placeholder="Balance Pending" readonly style="background:#fef2f2; color:red; font-weight:bold;">
+                
+                <select id="f-pay">
+                    <option>Cash</option><option>UPI</option><option>Card</option>
+                </select>
+                <input type="text" id="f-card" placeholder="Bank / Last 4 Digits">
+                <input type="text" id="f-insp" placeholder="Inspection By">
+            </div>
+            <button onclick="saveData()" class="btn btn-save" id="save-btn">💾 Save Policy Record</button>
+            <button onclick="resetForm()" class="btn" style="background:#666; width:100%; margin-top:5px;">Clear Form</button>
+        </div>
+    </div>
+
+    <div id="p-list" class="page hidden">
+        <button onclick="exportExcel()" class="btn btn-excel"><i class="fas fa-file-excel"></i> Export to Excel</button>
+        <div class="card" style="overflow-x: auto; padding:0;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th><th>Customer</th><th>Reg No</th><th>Premium</th><th>Balance</th><th>RM</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>
-    // Your Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyCb4Bd4pGSpJR2SOb6UGEORXb0-O_Ju_M0",
         authDomain: "radhe-radhe-insurance-4d1f8.firebaseapp.com",
@@ -75,37 +137,113 @@
     };
 
     firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
     const auth = firebase.auth();
 
     function login() {
-        const e = document.getElementById('email').value;
-        const p = document.getElementById('pass').value;
-        const m = document.getElementById('msg');
-
-        auth.signInWithEmailAndPassword(e, p)
-            .then(() => {
-                document.getElementById('login-container').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-            })
-            .catch(err => {
-                m.innerText = "Error: " + err.message;
-            });
+        auth.signInWithEmailAndPassword(document.getElementById('l-email').value, document.getElementById('l-pass').value)
+        .catch(err => document.getElementById('l-msg').innerText = "Galti: " + err.message);
     }
 
-    function logout() {
-        auth.signOut().then(() => {
-            location.reload();
+    auth.onAuthStateChanged(user => {
+        if(user) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('main-ui').classList.remove('hidden');
+            loadData();
+        }
+    });
+
+    function calcBal() {
+        let p = Number(document.getElementById('f-premium').value) || 0;
+        let r = Number(document.getElementById('f-rcvd').value) || 0;
+        document.getElementById('f-bal').value = p - r;
+    }
+
+    function saveData() {
+        const id = document.getElementById('f-id').value;
+        const data = {
+            date: document.getElementById('f-date').value,
+            rm: document.getElementById('f-rm').value || "N/A",
+            agent: document.getElementById('f-agent').value || "N/A",
+            csc: document.getElementById('f-csc').value || "N/A",
+            client: document.getElementById('f-client').value || "Unknown",
+            reg: document.getElementById('f-reg').value || "N/A",
+            polno: document.getElementById('f-polno').value || "N/A",
+            vtype: document.getElementById('f-vtype').value,
+            comp: document.getElementById('f-comp').value,
+            ptype: document.getElementById('f-ptype').value,
+            premium: Number(document.getElementById('f-premium').value),
+            rcvd: Number(document.getElementById('f-rcvd').value),
+            bal: Number(document.getElementById('f-bal').value),
+            pay: document.getElementById('f-pay').value,
+            card: document.getElementById('f-card').value,
+            insp: document.getElementById('f-insp').value,
+            ts: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        const col = db.collection("all_policies");
+        const promise = id ? col.doc(id).update(data) : col.add(data);
+
+        promise.then(() => {
+            alert("✅ Data Saved! Radhe Radhe.");
+            resetForm();
+            showP('list');
         });
     }
 
-    // Check if user is already logged in
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('login-container').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-        }
-    });
-</script>
+    function loadData() {
+        db.collection("all_policies").orderBy("date", "desc").onSnapshot(snap => {
+            let h = ""; let tP = 0; let tB = 0; let rmM = {};
+            snap.forEach(doc => {
+                const d = doc.data(); d.id = doc.id;
+                tP += d.premium; tB += d.bal;
+                rmM[d.rm] = (rmM[d.rm] || 0) + d.premium;
+                h += `<tr>
+                    <td>${d.date}</td><td><b>${d.client}</b></td><td>${d.reg}</td>
+                    <td>₹${d.premium}</td><td style="color:red">₹${d.bal}</td><td>${d.rm}</td>
+                    <td>
+                        <i class="fas fa-edit" onclick="editData('${d.id}')" style="color:blue; cursor:pointer"></i>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('table-body').innerHTML = h;
+            document.getElementById('st-count').innerText = snap.size;
+            document.getElementById('st-prem').innerText = "₹" + tP.toLocaleString();
+            document.getElementById('st-pend').innerText = "₹" + tB.toLocaleString();
+        });
+    }
 
+    function editData(id) {
+        db.collection("all_policies").doc(id).get().then(doc => {
+            const d = doc.data();
+            document.getElementById('f-id').value = id;
+            document.getElementById('f-date').value = d.date;
+            document.getElementById('f-rm').value = d.rm;
+            document.getElementById('f-agent').value = d.agent;
+            document.getElementById('f-client').value = d.client;
+            document.getElementById('f-reg').value = d.reg;
+            document.getElementById('f-polno').value = d.polno;
+            document.getElementById('f-premium').value = d.premium;
+            document.getElementById('f-rcvd').value = d.rcvd;
+            document.getElementById('f-bal').value = d.bal;
+            document.getElementById('form-title').innerText = "✏️ Edit Policy Mode";
+            document.getElementById('save-btn').innerText = "Update Record";
+            showP('entry');
+        });
+    }
+
+    function resetForm() {
+        document.getElementById('f-id').value = "";
+        document.querySelectorAll('input').forEach(i => i.value = "");
+        document.getElementById('form-title').innerText = "📝 Policy Entry Form";
+        document.getElementById('save-btn').innerText = "Save Policy Record";
+    }
+
+    function showP(p) {
+        document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
+        document.getElementById('p-' + p).classList.remove('hidden');
+    }
+</script>
 </body>
 </html>
